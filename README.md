@@ -15,3 +15,24 @@ client2  | time="2024-03-14 21:30:36" level=info msg="action: receive_message | 
 client1  | time="2024-03-14 21:30:36" level=info msg="action: config | result: success | client_id: 1 | server_address: server:12345 | loop_lapse: 20s | loop_period: 5s | log_level: DEBUG"
 client1  | time="2024-03-14 21:30:36" level=info msg="action: receive_message | result: success | client_id: 1 | msg: [CLIENT 1] Message N°1\n"
 ```
+
+### Ejercicio N°1.1:
+Se agregó el archivo *n_clients_compose.py* en la carpeta raiz del proyecto, el cual sobreescribe el archivo *docker-compose-dev.yaml* con un número de clientes definido por el usuario.  
+Para ejecutarlo, se debe correr el siguiente comando (reemplazando `3` por el número de clientes deseado):
+```bash
+python n_clients_compose.py 3
+```
+Luego, al ejecutar `make docker-compose-up`, el sistema inicia con la cantidad de clientes definida:
+```bash
+% make docker-compose-up
+.
+.
+.
+docker compose -f docker-compose-dev.yaml up -d --build
+[+] Running 5/5
+ ✔ Network tp0_testing_net  Created
+ ✔ Container server         Started
+ ✔ Container client3        Started
+ ✔ Container client2        Started
+ ✔ Container client1        Started     
+```
