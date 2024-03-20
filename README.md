@@ -36,3 +36,19 @@ docker compose -f docker-compose-dev.yaml up -d --build
  ✔ Container client2        Started
  ✔ Container client1        Started     
 ```
+
+### Ejercicio N°2:
+Se agregan volúmenes en la definición del docker-compose (y en el script generador también) tanto en el server como en los clientes de la siguiente forma:
+```yaml
+# server
+volumes:
+      - ./server/config.ini:/config.ini
+
+
+# client
+volumes:
+      - ./client/config.yaml:/config.yaml
+```
+
+También se puede eliminar la linea que copiaba el archivo de configuración del dockerfile del cliente, que ya no es necesaria.  
+De esta manera, se puede comprobar que al hacer un cambio en cualquiera de los dos archivos, y volver a levantar el respectivo contenedor (sin necesidad de hacer un build nuevo) este se  levantará con la nueva configuración.

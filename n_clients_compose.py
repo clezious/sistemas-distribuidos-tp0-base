@@ -10,6 +10,8 @@ SERVER_SERVICE = """
             - LOGGING_LEVEL=DEBUG
         networks:
             - testing_net
+        volumes:
+            - ./server/config.ini:/config.ini
 """
 
 TESTING_NET = """
@@ -51,6 +53,8 @@ def get_client_services(num_clients):
             - testing_net
         depends_on:
             - server
+        volumes:
+            - ./client/config.yaml:/config.yaml
 """
     return clients
 
