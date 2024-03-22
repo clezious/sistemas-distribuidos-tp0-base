@@ -26,8 +26,13 @@ docker-image:
 .PHONY: docker-image
 
 docker-compose-up: docker-image
-	docker compose -f docker-compose-dev.yaml up -d --build
+	docker compose -f docker-compose-test.yaml up -d --build
 .PHONY: docker-compose-up
+
+docker-compose-up-test:
+	docker compose -f docker-compose-dev.yaml -f docker-compose-test.yaml up server test_client --abort-on-container-exit --build
+	docker compose -f docker-compose-dev.yaml -f docker-compose-test.yaml down server test_client
+.PHONY: docker-compose-up-test
 
 docker-compose-down:
 	docker compose -f docker-compose-dev.yaml stop -t 1

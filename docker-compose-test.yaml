@@ -1,0 +1,14 @@
+version: '3.9'
+services:
+  test_client:
+    container_name: test_client
+    build:
+      context: .
+      dockerfile: ./netcat-test/Dockerfile
+    entrypoint: /netcat-test.sh
+    networks:
+      - testing_net
+    depends_on:
+      - server
+    volumes:
+      - ./netcat-test/netcat-test.sh:/netcat-test.sh

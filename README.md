@@ -52,3 +52,27 @@ volumes:
 
 También se puede eliminar la linea que copiaba el archivo de configuración del dockerfile del cliente, que ya no es necesaria.  
 De esta manera, se puede comprobar que al hacer un cambio en cualquiera de los dos archivos, y volver a levantar el respectivo contenedor (sin necesidad de hacer un build nuevo) este se  levantará con la nueva configuración.
+
+### Ejercicio N°3:
+Se agregó un nuevo archivo `docker-compose-test.yaml` que levanta un nuevo servicio llamado `test_client` que ejecuta el script `netcat-test.sh` que envía un mensaje al servidor utilizando netcat, y verifica que el mensaje recibido sea el mismo.  
+Se agregó además en el makefile la regla `docker-compose-test-up` que levanta este nuevo servicio junto con el servidor y al finalizar los detiene (se agregó `--abort-on-container-exit` en el comando de ejecución de docker compose para esto).  
+El resultado exitoso (o no) del test se puede comprobar por consola:
+```bash
+[+] Running 2/0
+ ✔ Container server       Created                                                                                                                                                                                                                                        0.0s 
+ ✔ Container test_client  Created                                                                                                                                                                                                                                        0.0s 
+Attaching to server, test_client
+server       | 2024-03-22 03:12:37 DEBUG    action: config | result: success | port: 12345 | listen_backlog: 5 | logging_level: DEBUG
+server       | 2024-03-22 03:12:37 INFO     action: accept_connections | result: in_progress
+test_client  | Sending message to server: Hello, world!
+server       | 2024-03-22 03:12:37 INFO     action: accept_connections | result: success | ip: 172.25.125.3
+server       | 2024-03-22 03:12:37 INFO     action: receive_message | result: success | ip: 172.25.125.3 | msg: Hello, world!
+server       | 2024-03-22 03:12:37 INFO     action: accept_connections | result: in_progress
+test_client  | Received message from server: Hello, world!
+test_client  | Test passed: Sent and received messages are the same.
+test_client exited with code 0
+Aborting on container exit...
+[+] Stopping 2/2
+ ✔ Container test_client  Stopped                                                                                                                                                                                                                                        0.0s 
+ ✔ Container server       Stopped     
+```
