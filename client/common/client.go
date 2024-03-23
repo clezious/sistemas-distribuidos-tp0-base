@@ -21,13 +21,15 @@ type ClientConfig struct {
 type Client struct {
 	config ClientConfig
 	conn   net.Conn
+	shouldStop chan bool
 }
 
 // NewClient Initializes a new client receiving the configuration
 // as a parameter
-func NewClient(config ClientConfig) *Client {
+func NewClient(config ClientConfig, shouldStop chan bool) *Client {
 	client := &Client{
 		config: config,
+		shouldStop: shouldStop,
 	}
 	return client
 }
@@ -54,9 +56,19 @@ func (c *Client) StartClientLoop() {
 	msgID := 1
 
 loop:
+
 	// Send messages if the loopLapse threshold has not been surpassed
-	for timeout := time.After(c.config.LoopLapse); ; {
+	for timeout := time.After(c.config.LoopLapse); ; {		
 		select {
+		case <-c.shouldStop:
+			log.Infof("action: stop_received | result: success | client_id: %v",
+				c.config.ID,
+			)
+			c.conn.Close()
+			log.Infof("action: shutting_down_socket | result: success | client_id: %v",
+			 	c.config.ID,
+			)
+			break loop			
 		case <-timeout:
 	        log.Infof("action: timeout_detected | result: success | client_id: %v",
                 c.config.ID,

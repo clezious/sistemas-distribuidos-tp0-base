@@ -35,7 +35,7 @@ docker-compose-up-test:
 .PHONY: docker-compose-up-test
 
 docker-compose-down:
-	docker compose -f docker-compose-dev.yaml stop -t 1
+	docker compose -f docker-compose-dev.yaml stop -t 6
 	docker compose -f docker-compose-dev.yaml down
 .PHONY: docker-compose-down
 

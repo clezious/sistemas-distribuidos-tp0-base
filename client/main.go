@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"strings"
 	"time"
+	"os"
+    "os/signal"
+    "syscall"
 
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -107,6 +110,15 @@ func main() {
 		LoopPeriod:    v.GetDuration("loop.period"),
 	}
 
-	client := common.NewClient(clientConfig)
+	signals := make(chan os.Signal, 1)
+	signal.Notify(signals, syscall.SIGTERM)
+	shouldStop := make(chan bool, 1)
+	go func() {
+        <-signals
+        fmt.Println("\nReceived SIGTERM, shutting down gracefully...")        
+        shouldStop <- true
+    }()
+
+	client := common.NewClient(clientConfig, shouldStop)
 	client.StartClientLoop()
 }

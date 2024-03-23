@@ -8,6 +8,14 @@ class Server:
         self._server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self._server_socket.bind(('', port))
         self._server_socket.listen(listen_backlog)
+        self.should_stop = False
+
+    def stop(self):
+        logging.debug("Gracefully stopping server")
+        self.should_stop = True
+        self._server_socket.shutdown(socket.SHUT_RDWR)
+        self._server_socket.close()
+        logging.debug("Server socket closed")
 
     def run(self):
         """
@@ -18,11 +26,13 @@ class Server:
         finishes, servers starts to accept new connections again
         """
 
-        # TODO: Modify this program to handle signal to graceful shutdown
-        # the server
-        while True:
-            client_sock = self.__accept_new_connection()
-            self.__handle_client_connection(client_sock)
+        while self.should_stop is False:
+            try:
+                client_sock = self.__accept_new_connection()
+                self.__handle_client_connection(client_sock)
+            except OSError:
+                # Socket closed from outside
+                continue
 
     def __handle_client_connection(self, client_sock):
         """
