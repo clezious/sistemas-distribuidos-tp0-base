@@ -95,4 +95,16 @@ Se hicieron las siguientes modificaciones en código del servidor y del cliente:
       - En el *case* de `StartClientLoop()` se agrega una rama que verifica si se recibe un *true* en el channel `shouldStop`.
            - Si es así, se cierra el socket y se sale del loop.  
 
-Como por defecto el cliente ejecuta el loop cada 5 segundos, también se aumentó el tiempo para esperar antes de mandar un SIGKILL en el comando docker-compose-down, a `-t 6`, ya que puede pasar que el cliente no haya llegado a ejecutar el loop antes de que se cierre el contenedor (por defecto son 5 segundos, si eso cambiara habría que modificar de vuelta el `-t`).
+Como por defecto el cliente ejecuta el loop cada 5 segundos, también se aumentó el tiempo para esperar antes de mandar un SIGKILL en el comando docker-compose-down, a `-t 6`, ya que puede pasar que el cliente no haya llegado a ejecutar el loop antes de que se cierre el contenedor (por defecto son 5 segundos, si eso cambiara habría que modificar de vuelta el `-t`).  
+
+### Ejercicio N°5:
+- Cliente:  
+    - Se agregaron las nuevas variables de entorno en forma similar a las existentes.  
+        - Pero en estas nuevas variables se hace un saneamiendo previo, eliminando los caracteres `|` y `\n` de los valores.
+    - Se agregaron 3 nuevos clientes en el docker compose, y ahora todos tienen todas las nuevas variables de entorno de las apuestas a realizar.
+    - Se agregó el archivo `common/protocol.go` con las funciones para enviar y recibir mensajes de apuestas hacia y desde el servidor, con el formato:  
+        ```go
+            ID|NOMBRE|APELLIDO|DOCUMENTO|NACIMIENTO|NUMERO\n
+        ```
+    - Se modificó el archivo `client/client.go` para que ahora se utilice el protocolo para enviar y recibir mensajes. Se agregaron además los logs pedidos.
+    - Se modificó el método `StartClientLoop()` para que ahora se envíe una apuesta y luego termine, eliminando la lógica previa de timeouts(por el momento deja de ser un loop...).

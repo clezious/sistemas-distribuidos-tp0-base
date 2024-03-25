@@ -38,6 +38,11 @@ func InitConfig() (*viper.Viper, error) {
 	v.BindEnv("loop", "period")
 	v.BindEnv("loop", "lapse")
 	v.BindEnv("log", "level")
+	v.BindEnv("NOMBRE","NOMBRE")
+	v.BindEnv("APELLIDO","APELLIDO")
+	v.BindEnv("DOCUMENTO","DOCUMENTO")
+	v.BindEnv("NACIMIENTO","NACIMIENTO")
+	v.BindEnv("NUMERO","NUMERO")	
 
 	// Try to read configuration from config file. If config file
 	// does not exists then ReadInConfig will fail but configuration
@@ -55,6 +60,14 @@ func InitConfig() (*viper.Viper, error) {
 
 	if _, err := time.ParseDuration(v.GetString("loop.period")); err != nil {
 		return nil, errors.Wrapf(err, "Could not parse CLI_LOOP_PERIOD env var as time.Duration.")
+	}
+
+	// Remove invalid chars from  NOMBRE, APELLIDO, DOCUMENTO, NACIMIENTO and NUMERO
+	for _, key := range []string{"NOMBRE", "APELLIDO", "DOCUMENTO", "NACIMIENTO", "NUMERO"} {
+		if v.IsSet(key) {
+			v.Set(key, strings.ReplaceAll(v.GetString(key), "|", ""))
+			v.Set(key, strings.ReplaceAll(v.GetString(key), "\n", ""))
+		}
 	}
 
 	return v, nil
@@ -81,12 +94,17 @@ func InitLogger(logLevel string) error {
 // PrintConfig Print all the configuration parameters of the program.
 // For debugging purposes only
 func PrintConfig(v *viper.Viper) {
-	logrus.Infof("action: config | result: success | client_id: %s | server_address: %s | loop_lapse: %v | loop_period: %v | log_level: %s",
+	logrus.Infof("action: config | result: success | client_id: %s | server_address: %s | loop_lapse: %v | loop_period: %v | log_level: %s| NOMBRE: %s | APELLIDO: %s | DOCUMENTO: %s | NACIMIENTO: %s | NUMERO: %s",
 	    v.GetString("id"),
 	    v.GetString("server.address"),
 	    v.GetDuration("loop.lapse"),
 	    v.GetDuration("loop.period"),
 	    v.GetString("log.level"),
+		v.GetString("NOMBRE"),
+		v.GetString("APELLIDO"),
+		v.GetString("DOCUMENTO"),
+		v.GetString("NACIMIENTO"),
+		v.GetString("NUMERO"),
     )
 }
 
@@ -108,6 +126,11 @@ func main() {
 		ID:            v.GetString("id"),
 		LoopLapse:     v.GetDuration("loop.lapse"),
 		LoopPeriod:    v.GetDuration("loop.period"),
+		NOMBRE:        v.GetString("NOMBRE"),
+		APELLIDO:      v.GetString("APELLIDO"),
+		DOCUMENTO:     v.GetString("DOCUMENTO"),
+		NACIMIENTO:    v.GetString("NACIMIENTO"),
+		NUMERO:        v.GetString("NUMERO"),
 	}
 
 	signals := make(chan os.Signal, 1)

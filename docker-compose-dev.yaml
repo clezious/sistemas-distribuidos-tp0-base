@@ -20,6 +20,11 @@ services:
     environment:
       - CLI_ID=1
       - CLI_LOG_LEVEL=DEBUG
+      - NOMBRE=Santiago Lionel 
+      - APELLIDO=Lorc|a 
+      - DOCUMENTO=30904465 
+      - NACIMIENTO=1999-03-17||| 
+      - NUMERO=7574\n
     networks:
       - testing_net
     depends_on:
@@ -34,6 +39,68 @@ services:
     environment:
       - CLI_ID=2
       - CLI_LOG_LEVEL=DEBUG
+      - NOMBRE=Juan Pablo
+      - APELLIDO=Rodriguez
+      - DOCUMENTO=30904466
+      - NACIMIENTO=2000-03-19
+      - NUMERO=7575
+    networks:
+      - testing_net
+    depends_on:
+      - server
+    volumes:
+      - ./client/config.yaml:/config.yaml
+  
+  client3:
+    container_name: client3
+    image: client:latest
+    entrypoint: /client
+    environment:
+      - CLI_ID=3
+      - CLI_LOG_LEVEL=DEBUG
+      - NOMBRE=Jorge
+      - APELLIDO=Almidon
+      - DOCUMENTO=30904467
+      - NACIMIENTO=2001-03-19
+      - NUMERO=7576
+    networks:
+      - testing_net
+    depends_on:
+      - server
+    volumes:
+      - ./client/config.yaml:/config.yaml
+  
+  client4:
+    container_name: client4
+    image: client:latest
+    entrypoint: /client
+    environment:
+      - CLI_ID=4
+      - CLI_LOG_LEVEL=DEBUG
+      - NOMBRE=Luiz
+      - APELLIDO=Alberto
+      - DOCUMENTO=30904468
+      - NACIMIENTO=2002-03-19
+      - NUMERO=7577
+    networks:
+      - testing_net
+    depends_on:
+      - server
+    volumes:
+      - ./client/config.yaml:/config.yaml
+  
+  client5:
+    container_name: client5
+    image: client:latest
+    entrypoint: /client
+    environment:
+      - CLI_ID=5
+      - CLI_LOG_LEVEL=DEBUG
+      - NOMBRE=Juan
+      - APELLIDO=Carlos
+      - DOCUMENTO=30904469
+      - NACIMIENTO=2003-03-19
+      - NUMERO=7578
     networks:
       - testing_net
     depends_on:
