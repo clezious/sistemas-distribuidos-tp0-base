@@ -86,12 +86,13 @@ Se hicieron las siguientes modificaciones en código del servidor y del cliente:
       - Se agregó un handler (utilizando la lib *Signals*) para capturar la señal `SIGTERM`.
             - Cuando se reciba esta señal, se llamará al método `Server.stop()`.
             - De esta forma el servidor terminará de responder al cliente actual (de existir), sin aceptar nuevas conexiones, y luego terminará su ejecución.
-- Cliente:  
+ - Cliente:  
       - Se agregaron los channels `signals` y `shouldStop`.
-            - `signals` recibe las señales del sistema y se configura para reaccionar a `SIGTERM`.
-            - `shouldStop` es un `chan bool` que se setea en *True* cuando se recibe la señal `SIGTERM`.
-                  - Esto se hace dentro de una *goroutine* iniciada en main, para no bloquear la ejecución del programa.
+           - `signals` recibe las señales del sistema y se configura para reaccionar a `SIGTERM`.
+           - `shouldStop` es un `chan bool` que se setea en *True* cuando se recibe la señal `SIGTERM`.
+                - Esto se hace dentro de una *goroutine* iniciada en main, para no bloquear la ejecución del programa.
       - Se agrega el atributo `shouldStop` en la estructura `Client`, donde se pasa en la construcción del cliente el channel `shouldStop`.
       - En el *case* de `StartClientLoop()` se agrega una rama que verifica si se recibe un *true* en el channel `shouldStop`.
-            - Si es así, se cierra el socket y se sale del loop.  
+           - Si es así, se cierra el socket y se sale del loop.  
+
 Como por defecto el cliente ejecuta el loop cada 5 segundos, también se aumentó el tiempo para esperar antes de mandar un SIGKILL en el comando docker-compose-down, a `-t 6`, ya que puede pasar que el cliente no haya llegado a ejecutar el loop antes de que se cierre el contenedor (por defecto son 5 segundos, si eso cambiara habría que modificar de vuelta el `-t`).
