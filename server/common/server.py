@@ -25,11 +25,12 @@ class Server:
 
     def run(self):
         """
-        Dummy Server loop
+        Server loop
 
-        Server that accept a new connections and establishes a
-        communication with a client. After client with communucation
-        finishes, servers starts to accept new connections again
+        Server that accepts a new connections and establishes a
+        communication with a client. 
+        Client interaction is then handled in a new process so that the server 
+        can accept new connections and handle them in parallel.
         """
         processes = []
         while self.should_stop is False:
