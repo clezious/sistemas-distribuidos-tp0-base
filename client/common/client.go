@@ -6,6 +6,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strings"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -108,7 +109,16 @@ func (c *Client) StartClientLoop() {
 			err,
 		)		
 		return
-	}    	
+	}
+	// send finished message
+	c.sendFinished()		
+	// query winners
+	retry := true
+	for retry {
+		retry = c.sendQueryWinners()
+		// wait 2 seconds and query again
+		time.Sleep(2 * time.Second)		
+	}
 }
 
 func (c *Client) sendBatch(batch string) {
@@ -143,3 +153,60 @@ func (c *Client) sendBatch(batch string) {
 	}		
 }
 
+func (c *Client) sendFinished() {
+	c.createClientSocket()
+	defer c.stop()
+	// Send finished message to server
+	err := sendClientFinished(c.conn, c.config.ID)
+	if err != nil {
+		log.Fatalf(
+			"action: send_finished_message | result: fail | client_id: %v | error: %v",
+			c.config.ID,
+			err,
+		)		
+		return
+	}	
+	log.Infof("action: send_finished_message | result: success | client_id: %v",
+		c.config.ID,
+	)
+}
+
+func (c *Client) sendQueryWinners() bool{
+	c.createClientSocket()
+	defer c.stop()
+	retry := false
+	// Send query to server
+	err := sendClientQueryWinners(c.conn, c.config.ID)
+	if err != nil {
+		log.Fatalf(
+			"action: send_query_message | result: fail | client_id: %v | error: %v",
+			c.config.ID,
+			err,
+		)		
+		return retry
+	}	
+	// Receive server response
+	// If the query fails, return retry = true
+	msg, err := recvServerMessage(c.conn)
+	if err != nil {
+		log.Fatalf(
+			"action: recv_server_message | result: fail | error: %v",
+			err,
+		)		
+		return retry
+	}	
+	if msg != "QUERY_FAIL\n" {			
+		winners := strings.Split(msg, ",")[1]
+		log.Infof("action: consulta_ganadores | result: success | client_id: %v | cant_ganadores: %v",
+			c.config.ID,
+			winners,
+		)
+	} else {
+		retry = true
+		log.Infof("action: consulta_ganadores | result: fail | client_id: %v",
+			c.config.ID,			
+		)
+	}
+
+	return retry
+}

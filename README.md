@@ -135,3 +135,18 @@ Como por defecto el cliente ejecuta el loop cada 5 segundos, también se aument�
     - Se modificó el protocolo para que ahora el servidor pueda recibir batches de apuestas, devolviendo una lista de apuestas.
     - se modificó la lógica de almacenamiento de apuestas para que solo responda al cliente cuando se terminó de procesar el batch entero.
         - Se envía a `store_bet()` todo el batch, y luego se responde al cliente con un mensaje de confirmación.
+
+### Ejercicio N°7:
+- Protocolo:
+    - Se agregaron los siguientes mensajes al protocolo.
+        - `FINISHED,{cli_id}` : Se envía al servidor cuando el cliente termina de enviar todas las apuestas.
+            - No se espera respuesta del servidor.
+        - `QUERY,{cli_id}` : Se envía al servidor para consultar los ganadores de esta agencia
+            - El servidor responde:
+                - `QUERY_FAIL` si aún no puede responder la consulta porque todavía no se hizo el sorteo. 
+                - `QUERY_SUCCESS,{winners}` donde winners es la cantidad de ganadores de la agencia que consulta.
+- El servidor almacena un set con los *client_id*'s que ya terminaron de enviar apuestas, e inicia el sorteo cuando todos los clientes lo hayan hecho.
+    - La cantidad de clientes a esperar se pasa por una nueva variable de entorno `TOTAL_CLIENTS` que almacena el servidor.
+- El cliente ahora envía el mensaje `FINISHED` al terminar de enviar todas las apuestas, y luego entra en un loop en el que intenta obtener los ganadores enviando 
+el mensaje `QUERY`, y en caso de que no sea exitoso (por que aún el servidor no inició el sorteo) reintenta luego de 2 segundos.
+

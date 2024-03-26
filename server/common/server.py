@@ -1,16 +1,18 @@
 import socket
 import logging
 from common.protocol import Protocol
-from common.utils import Bet, store_bets
+from common.utils import Bet, store_bets, load_bets, has_won
 
 
 class Server:
-    def __init__(self, port, listen_backlog):
+    def __init__(self, port, listen_backlog, total_clients):
         # Initialize server socket
         self._server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self._server_socket.bind(('', port))
         self._server_socket.listen(listen_backlog)
         self.should_stop = False
+        self.clients_finished = set()
+        self.total_clients = int(total_clients)
 
     def stop(self):
         logging.debug("Gracefully stopping server")
@@ -49,7 +51,23 @@ class Server:
                 bets = [Bet(*bet) for bet in msg['data']]
                 store_bets(bets)
                 logging.info(f'action: apuestas_almacenadas | result: success | batch_size: {len(bets)}')
-            Protocol.send_server_message(client_sock, 'action: batch_processed | result: success')
+                Protocol.send_server_message(client_sock, 'action: batch_processed | result: success')
+            if msg['action'] == 'client_finished':
+                self.clients_finished.add(msg['data']['agency'])
+                logging.info(f'action: client_finished | result: success | clients_finished: {self.clients_finished}')
+                if self.all_clients_finished():
+                    logging.info('action: sorteo | result: success')
+            if msg['action'] == 'query':
+                if not self.all_clients_finished():
+                    logging.info('action: query | result: fail')
+                    Protocol.send_server_message(client_sock, 'QUERY_FAIL')
+                else:
+                    bets = load_bets()
+                    agency = msg['data']['agency']
+                    winners = len([bet for bet in bets if (bet.agency == int(agency) and has_won(bet))])
+                    logging.info(f'action: query | result: success | agency: {agency} | winners: {winners}')
+                    Protocol.send_server_message(client_sock, f'QUERY_SUCCESS,{winners}')
+
         except OSError as e:
             logging.error(f"action: handle_client_connection | result: fail | error: {e}")
         finally:
@@ -68,3 +86,6 @@ class Server:
         c, addr = self._server_socket.accept()
         logging.info(f'action: accept_connections | result: success | ip: {addr[0]}')
         return c
+
+    def all_clients_finished(self):
+        return len(self.clients_finished) == self.total_clients

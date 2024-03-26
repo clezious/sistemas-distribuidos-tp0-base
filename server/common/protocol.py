@@ -21,13 +21,17 @@ class Protocol:
             while (msg := Protocol._read_line(client_sock)) != "BATCH_END":
                 bets.append(msg.split(","))
             return {'action': 'batch', 'data': bets}
+        elif msg.startswith("FINISHED"):
+            return {'action': 'client_finished', 'data': {"agency": msg.split(",")[1]}}
+        elif msg.startswith("QUERY"):
+            return {'action': 'query', 'data': {"agency": msg.split(",")[1]}}
         addr = client_sock.getpeername()
         logging.info(f'action: receive_message | result: success | ip: {addr[0]} | msg: {msg}')
         return {'action': 'bet', 'data': msg.split(",")}
 
     @staticmethod
     def send_server_message(client_sock: socket.socket, msg):
-        msg = "{}\n".format(msg).encode('latin-1')
+        msg = '{}\n'.format(msg).encode('latin-1')
         msg_len = len(msg)
         sent = 0
         while sent < msg_len:

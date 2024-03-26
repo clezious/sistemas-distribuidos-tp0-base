@@ -30,6 +30,18 @@ func sendClientBatch(conn net.Conn, batch string) error {
 	return nil
 }
 
+func sendClientFinished(conn net.Conn, clientId string) error {
+	// Sends a message to the server indicating that the client has finished sending bets
+	_, err := fmt.Fprintf(conn, "FINISHED,%v\n", clientId)
+	return err
+}
+
+func sendClientQueryWinners(conn net.Conn, clientId string) error {
+	// Sends a query to check the quantity of the winning bets from this agency
+	_, err := fmt.Fprintf(conn, "QUERY,%v\n", clientId)
+	return err
+}
+
 func recvServerMessage(conn net.Conn) (string, error) {
 	msg, err := bufio.NewReader(conn).ReadString('\n')	
 	return msg, err
