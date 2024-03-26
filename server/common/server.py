@@ -44,12 +44,12 @@ class Server:
         client socket will also be closed
         """
         try:
-            [agency, first_name, last_name, document, birthdate, number] = Protocol.read_client_message(client_sock)
-            bet = Bet(agency, first_name, last_name, document, birthdate, number)
-            store_bets([bet])
-            response = f'action: apuesta_almacenada | result: success | dni: {bet.document} | numero: {bet.number}'
-            logging.info(response)
-            Protocol.send_server_message(client_sock, response)
+            msg = Protocol.read_client_message(client_sock)
+            if msg['action'] == 'batch':
+                bets = [Bet(*bet) for bet in msg['data']]
+                store_bets(bets)
+                logging.info(f'action: apuestas_almacenadas | result: success | batch_size: {len(bets)}')
+            Protocol.send_server_message(client_sock, 'action: batch_processed | result: success')
         except OSError as e:
             logging.error(f"action: handle_client_connection | result: fail | error: {e}")
         finally:

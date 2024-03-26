@@ -43,6 +43,7 @@ func InitConfig() (*viper.Viper, error) {
 	v.BindEnv("DOCUMENTO","DOCUMENTO")
 	v.BindEnv("NACIMIENTO","NACIMIENTO")
 	v.BindEnv("NUMERO","NUMERO")	
+	v.BindEnv("batch", "size")	
 
 	// Try to read configuration from config file. If config file
 	// does not exists then ReadInConfig will fail but configuration
@@ -61,11 +62,11 @@ func InitConfig() (*viper.Viper, error) {
 	if _, err := time.ParseDuration(v.GetString("loop.period")); err != nil {
 		return nil, errors.Wrapf(err, "Could not parse CLI_LOOP_PERIOD env var as time.Duration.")
 	}
-
+	
 	// Remove invalid chars from  NOMBRE, APELLIDO, DOCUMENTO, NACIMIENTO and NUMERO
 	for _, key := range []string{"NOMBRE", "APELLIDO", "DOCUMENTO", "NACIMIENTO", "NUMERO"} {
 		if v.IsSet(key) {
-			v.Set(key, strings.ReplaceAll(v.GetString(key), "|", ""))
+			v.Set(key, strings.ReplaceAll(v.GetString(key), ",", ""))
 			v.Set(key, strings.ReplaceAll(v.GetString(key), "\n", ""))
 		}
 	}
@@ -105,6 +106,7 @@ func PrintConfig(v *viper.Viper) {
 		v.GetString("DOCUMENTO"),
 		v.GetString("NACIMIENTO"),
 		v.GetString("NUMERO"),
+		v.GetInt("batch.size"),
     )
 }
 
@@ -131,6 +133,7 @@ func main() {
 		DOCUMENTO:     v.GetString("DOCUMENTO"),
 		NACIMIENTO:    v.GetString("NACIMIENTO"),
 		NUMERO:        v.GetString("NUMERO"),
+		BatchSize:     v.GetInt("batch.size"),
 	}
 
 	signals := make(chan os.Signal, 1)

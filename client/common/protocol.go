@@ -3,23 +3,19 @@ package common
 import (	
 	"fmt"
 	"net"	
-	"bufio"
+	"bufio"	
 )
 
-func sendClientMessage(conn net.Conn, ID string, NOMBRE string,
-						APELLIDO string,DOCUMENTO string,
-					   	NACIMIENTO string,NUMERO string) error {
-	// Sends bet information to the server
-	// in the format: ID|NOMBRE|APELLIDO|DOCUMENTO|NACIMIENTO|NUMERO
-	// With a newline character at the end
-	msg := fmt.Sprintf(		
-		"%v|%v|%v|%v|%v|%v\n",
-		ID,
-		NOMBRE,
-		APELLIDO,
-		DOCUMENTO,
-		NACIMIENTO,
-		NUMERO,			
+func sendClientBatch(conn net.Conn, batch string) error {
+	// Sends a batch of bets to the server
+	// in the format: 
+	// BATCH_START\n
+	// ID,NOMBRE,APELLIDO,DOCUMENTO,NACIMIENTO,NUMERO\n
+	// ...
+	// BATCH_END\n	
+	msg := fmt.Sprintf(
+		"BATCH_START\n%sBATCH_END\n",
+		batch,
 	)
 	msgLen := len(msg)	
 	bytesWritten := 0
@@ -35,6 +31,6 @@ func sendClientMessage(conn net.Conn, ID string, NOMBRE string,
 }
 
 func recvServerMessage(conn net.Conn) (string, error) {
-	msg, err := bufio.NewReader(conn).ReadString('\n')
+	msg, err := bufio.NewReader(conn).ReadString('\n')	
 	return msg, err
 }

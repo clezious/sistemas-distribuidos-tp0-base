@@ -4,5 +4,7 @@ server:
 loop:
   lapse: "0m20s"
   period: "5s"
+batch:
+  size: 10
 log:
   level: "info"

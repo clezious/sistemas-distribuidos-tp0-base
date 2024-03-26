@@ -3,7 +3,9 @@ package common
 import (	
 	"net"
 	"time"
-
+	"bufio"
+	"fmt"
+	"os"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -18,6 +20,7 @@ type ClientConfig struct {
 	DOCUMENTO     string
 	NACIMIENTO    string
 	NUMERO        string
+	BatchSize     int
 }
 
 // Client Entity that encapsulates how
@@ -60,46 +63,83 @@ func (c *Client) stop() {
 }
 
 func (c *Client) StartClientLoop() {			
-	select {
-		case <-c.shouldStop:
-			log.Infof("action: stop_received | result: success | client_id: %v",
-				c.config.ID,
-			)
-			c.stop()
-			return
-		default:
+	// open agency-{id}.csv file
+	file, err := os.Open(fmt.Sprintf("./data/agency-%v.csv", c.config.ID))
+    if err != nil {
+		log.Fatalf(
+			"action: open_agency_file | result: fail | client_id: %v | error: %v",
+			c.config.ID,
+			err,
+		)		
+		return
 	}
-			
-	c.createClientSocket()
+	defer file.Close()
+	
+	// read file line by line, creating and sending batches
+	scanner := bufio.NewScanner(file)	
+	batch := ""	
+	lineCount := 0
+	for scanner.Scan() {		
+		select {
+			case <-c.shouldStop:
+				log.Infof("action: stop_received | result: success | client_id: %v",
+					c.config.ID,
+				)			
+				return
+			default:
+		}
+		if lineCount <= c.config.BatchSize {	
+			batch += fmt.Sprintf("%v,%s\n", c.config.ID, scanner.Text())
+			lineCount++
+		}
+		if lineCount == c.config.BatchSize {
+			c.sendBatch(batch)
+			batch = ""
+			lineCount = 0
+		}
+	}
+	if lineCount > 0 {		
+		c.sendBatch(batch)
+	}
+	if err := scanner.Err(); err != nil {
+			log.Fatalf(
+			"action: read_agency_file | result: fail | client_id: %v | error: %v",
+			c.config.ID,
+			err,
+		)		
+		return
+	}    	
+}
 
-	err := sendClientMessage(c.conn, c.config.ID, c.config.NOMBRE, c.config.APELLIDO, c.config.DOCUMENTO, c.config.NACIMIENTO, c.config.NUMERO)
+func (c *Client) sendBatch(batch string) {
+	c.createClientSocket()
+	defer c.stop()
+	// Send batch to server
+	err := sendClientBatch(c.conn, batch)
 	if err != nil {
 		log.Fatalf(
 			"action: send_client_message | result: fail | client_id: %v | error: %v",
 			c.config.ID,
 			err,
-		)
-		c.stop()
+		)		
 		return
-	}
+	}	
+	// Receive server response
 	msg, err := recvServerMessage(c.conn)
 	if err != nil {
 		log.Fatalf(
 			"action: recv_server_message | result: fail | error: %v",
 			err,
-		)
-		c.stop()
+		)		
 		return
 	} else {
 		log.Infof("action: server_response | result: success | client_id: %v | response: %v",
 			c.config.ID,
 			msg,
 		)
-		log.Infof("action: apuesta_enviada | result: success | dni: %v | numero: %v",
-			c.config.DOCUMENTO,
-			c.config.NUMERO,
+		log.Infof("action: apuestas_enviadas | result: success | client_id: %v",
+			c.config.ID,
 		)
-	}
-	
-	c.stop()
+	}		
 }
+

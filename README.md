@@ -114,3 +114,24 @@ Como por defecto el cliente ejecuta el loop cada 5 segundos, también se aument�
         - La escritura en principio solo envía un mensaje, simil a lo que se hacía en la implementación original.
         - En ambos casos se agregaron controles para evitar short reads y writes.
     - _handle_client_connection ahora crea un nuevo objeto `Bet` con los datos recibidos, y lo agrega almacena llamando a `store_bet()`. Luego loggea lo pedido y ademas lo envía al cliente como confirmación.
+
+### Ejercicio N°6:
+- Protocolo
+    - Se cambio el caracter delimitador del protocolo a `,` para coincidir con los csv dados.
+    - A partir de ahora, el protocolo se modifica para que los BATCHES se envien de la siguiente forma:
+        ```go
+        BATCH_START\n
+        ID,NOMBRE,APELLIDO,DOCUMENTO,NACIMIENTO,NUMERO\n
+        .
+        .
+        BATCH_END\n
+        ```
+        Es decir, se conserva el formato anterior para las apuestas, pero se delimita el batch con 2 nuevas lineas.
+- Cliente
+    - Se agregó como volumen la carpeta con los archivos csv de apuestas dados, para ser accedido dentro de cada contenedor cliente
+    - Se agregó la variable de configuración `batch.size` que controla la cantidad de apuestas por batch (por defecto 10, que debería cumplir sobrado con el requisito de ser menor a 8kB para las lineas que se ven en los archivos más los delimitadores).
+    - El ClientLoop ahora consiste en abrir el archivo csv correspondiente, leerlo linea por linea armando los batches y enviando cada batch al servidor.
+- Servidor
+    - Se modificó el protocolo para que ahora el servidor pueda recibir batches de apuestas, devolviendo una lista de apuestas.
+    - se modificó la lógica de almacenamiento de apuestas para que solo responda al cliente cuando se terminó de procesar el batch entero.
+        - Se envía a `store_bet()` todo el batch, y luego se responde al cliente con un mensaje de confirmación.
