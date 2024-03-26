@@ -57,7 +57,7 @@ class Server:
                 bets = [Bet(*bet) for bet in msg['data']]
                 self._store_bets(bets)
                 logging.info(f'action: apuestas_almacenadas | result: success | batch_size: {len(bets)}')
-                Protocol.send_server_message(client_sock, 'action: batch_processed | result: success')
+                Protocol.send_server_message(client_sock, action='batch_processed', data={'result': 'success'})
             if msg['action'] == 'client_finished':
                 self._add_client_finished(msg['data']['agency'])
                 logging.info(f'action: client_finished | result: success | clients_finished: {self._get_clients_finished_count()}')
@@ -66,13 +66,13 @@ class Server:
             if msg['action'] == 'query':
                 if not self.all_clients_finished():
                     logging.info('action: query | result: fail')
-                    Protocol.send_server_message(client_sock, 'QUERY_FAIL')
+                    Protocol.send_server_message(client_sock, action='query', data={'result': 'fail'})
                 else:
                     bets = self._load_bets()
                     agency = msg['data']['agency']
                     winners = len([bet for bet in bets if (bet.agency == int(agency) and has_won(bet))])
                     logging.info(f'action: query | result: success | agency: {agency} | winners: {winners}')
-                    Protocol.send_server_message(client_sock, f'QUERY_SUCCESS,{winners}')
+                    Protocol.send_server_message(client_sock, action='query', data={'result': 'success', 'winners': winners})
 
         except OSError as e:
             logging.error(f"action: handle_client_connection | result: fail | error: {e}")

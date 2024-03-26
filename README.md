@@ -155,3 +155,8 @@ Para lograr que el servidor pueda aceptar conexiones y procesar mensajes en para
 Ahora, una vez aceptado un nuevo cliente en el método `run()` del servidor, se crea un proceso hijo con el método `__handle_client_connection()` como *target* en vez de llamarlo en el mismo hilo como se hacía previamente.  
 Para esto, se cambió el `set` de *client_ids* por una `multiprocessing.Queue`, en donde se van encolando los *client_id*'s de los clientes que terminaron de enviar apuestas, y se verifica si la cantidad de *client_id*'s encolados es igual a la cantidad de clientes totales con su método `qsize()`.  
 Además, se agregó el atributo `lock = multiprocessing.lock()` en `Server`, que se utiliza para proteger el acceso a disco de las funciones `load_bets()` y `store_bet()`, ahora encapsuladas en métodos que adquieren y liberan el lock.
+
+
+### Extras:
+- Se hizo un refactor del método `Protocol.send_server_message()` en el *Server* para abstraer mejor la lógica interna del protocolo.
+    - Algunos mensajes que se enviaban desde *Server* cambiaron, pero no tenían impacto en el funcionamiento del sistema.

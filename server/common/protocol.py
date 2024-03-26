@@ -30,9 +30,16 @@ class Protocol:
         return {'action': 'bet', 'data': msg.split(",")}
 
     @staticmethod
-    def send_server_message(client_sock: socket.socket, msg):
+    def send_server_message(client_sock: socket.socket, action: str, data: dict = None):
+        msg = Protocol.generate_message_content(action, data)
         msg = '{}\n'.format(msg).encode('latin-1')
         msg_len = len(msg)
         sent = 0
         while sent < msg_len:
             sent += client_sock.send(msg[sent:])
+
+    @staticmethod
+    def generate_message_content(action: str, data: dict = None) -> str:
+        if action == 'query':
+            return 'QUERY_FAIL' if data.get('result') == 'fail' else f'QUERY_SUCCESS,{data.get("winners")}'
+        return f"{action.upper()}"
