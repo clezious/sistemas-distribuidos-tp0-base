@@ -1,6 +1,7 @@
 ## Parte 1: Introducción a Docker
 
-### Ejercicio N°1:
+### Ejercicio N°1:  
+Commit: `013683c9e97af9c8dc621986e8d38beb809bc5e5`  
 Se agregó en el archivo *docker-compose-dev* original un nuevo servicio, copia de client1 , pero reemplazando el `1` por un `2` (en el nombre y en la variable de entorno `CLI_ID`).  
 Al ejecutar docker-compose-up, el sistema inicia esta vez con 2 clientes de forma satisfactoria:
 ```bash
@@ -16,7 +17,8 @@ client1  | time="2024-03-14 21:30:36" level=info msg="action: config | result: s
 client1  | time="2024-03-14 21:30:36" level=info msg="action: receive_message | result: success | client_id: 1 | msg: [CLIENT 1] Message N°1\n"
 ```
 
-### Ejercicio N°1.1:
+### Ejercicio N°1.1: 
+Commit: `848e133dac71aa187d432819ef7bcff807f5b60d`  
 Se agregó el archivo *n_clients_compose.py* en la carpeta raiz del proyecto, el cual sobreescribe el archivo *docker-compose-dev.yaml* con un número de clientes definido por el usuario.  
 Para ejecutarlo, se debe correr el siguiente comando (reemplazando `3` por el número de clientes deseado):
 ```bash
@@ -38,6 +40,7 @@ docker compose -f docker-compose-dev.yaml up -d --build
 ```
 
 ### Ejercicio N°2:
+Commit: `867aabfa0d307fdff2dce6c71f830df46780b4fc`  
 Se agregan volúmenes en la definición del docker-compose (y en el script generador también) tanto en el server como en los clientes de la siguiente forma:
 ```yaml
 # server
@@ -54,6 +57,7 @@ También se puede eliminar la linea que copiaba el archivo de configuración del
 De esta manera, se puede comprobar que al hacer un cambio en cualquiera de los dos archivos, y volver a levantar el respectivo contenedor (sin necesidad de hacer un build nuevo) este se  levantará con la nueva configuración.
 
 ### Ejercicio N°3:
+Commit: `56c9710171076dad7a1321481e5b27fa02f67ad9`  
 Se agregó un nuevo archivo `docker-compose-test.yaml` que levanta un nuevo servicio llamado `test_client` que ejecuta el script `netcat-test.sh` que envía un mensaje al servidor utilizando netcat, y verifica que el mensaje recibido sea el mismo.  
 Se agregó además en el makefile la regla `docker-compose-test-up` que levanta este nuevo servicio junto con el servidor y al finalizar los detiene (se agregó `--abort-on-container-exit` en el comando de ejecución de docker compose para esto).  
 El resultado exitoso (o no) del test se puede comprobar por consola:
@@ -78,6 +82,7 @@ Aborting on container exit...
 ```
 
 ### Ejercicio N°4:
+Commit: `c194ed3bc7d99d4101a9cb17abd1f9727819c91c`  
 Se hicieron las siguientes modificaciones en código del servidor y del cliente:
  - Servidor:
       - Se agregó el atributo `should_stop`, por defecto en *False*, y el método `Server.stop()` para setearlo en *True*, y además hacer *shutdown* y *close* del `server_socket`.
@@ -98,6 +103,7 @@ Se hicieron las siguientes modificaciones en código del servidor y del cliente:
 Como por defecto el cliente ejecuta el loop cada 5 segundos, también se aumentó el tiempo para esperar antes de mandar un SIGKILL en el comando docker-compose-down, a `-t 6`, ya que puede pasar que el cliente no haya llegado a ejecutar el loop antes de que se cierre el contenedor (por defecto son 5 segundos, si eso cambiara habría que modificar de vuelta el `-t`).  
 
 ### Ejercicio N°5:
+Commit: `e553b9f2952a31e250a32d1a5b664edd247eab1c`  
 - Cliente:  
     - Se agregaron las nuevas variables de entorno en forma similar a las existentes.  
         - Pero en estas nuevas variables se hace un saneamiendo previo, eliminando los caracteres `|` y `\n` de los valores.
@@ -116,6 +122,7 @@ Como por defecto el cliente ejecuta el loop cada 5 segundos, también se aument�
     - _handle_client_connection ahora crea un nuevo objeto `Bet` con los datos recibidos, y lo agrega almacena llamando a `store_bet()`. Luego loggea lo pedido y ademas lo envía al cliente como confirmación.
 
 ### Ejercicio N°6:
+Commit: `e2d65d58077ceb14b4ae5429fa75bfa8bb664592`  
 - Protocolo
     - Se cambio el caracter delimitador del protocolo a `,` para coincidir con los csv dados.
     - A partir de ahora, el protocolo se modifica para que los BATCHES se envien de la siguiente forma:
@@ -137,6 +144,7 @@ Como por defecto el cliente ejecuta el loop cada 5 segundos, también se aument�
         - Se envía a `store_bet()` todo el batch, y luego se responde al cliente con un mensaje de confirmación.
 
 ### Ejercicio N°7:
+Commit: `2018df0d3592522e2fe0b3980fbbb8c50535dbfc`  
 - Protocolo:
     - Se agregaron los siguientes mensajes al protocolo.
         - `FINISHED,{cli_id}` : Se envía al servidor cuando el cliente termina de enviar todas las apuestas.
