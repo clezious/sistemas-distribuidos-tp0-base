@@ -24,7 +24,7 @@ services:
       - APELLIDO=Lorc|a 
       - DOCUMENTO=30904465 
       - NACIMIENTO=1999-03-17||| 
-      - NUMERO=7574\n
+      - NUMERO=7574
     networks:
       - testing_net
     depends_on:

@@ -108,3 +108,9 @@ Como por defecto el cliente ejecuta el loop cada 5 segundos, también se aument�
         ```
     - Se modificó el archivo `client/client.go` para que ahora se utilice el protocolo para enviar y recibir mensajes. Se agregaron además los logs pedidos.
     - Se modificó el método `StartClientLoop()` para que ahora se envíe una apuesta y luego termine, eliminando la lógica previa de timeouts(por el momento deja de ser un loop...).
+- Servidor:
+    - De forma similar al cliente, se agregó la clase `Protocol` con funciones para leer y enviar mensajes desde y hacia el socket del cliente.
+        - La lectura devuelve los campos de la apuesta en una lista de strings
+        - La escritura en principio solo envía un mensaje, simil a lo que se hacía en la implementación original.
+        - En ambos casos se agregaron controles para evitar short reads y writes.
+    - _handle_client_connection ahora crea un nuevo objeto `Bet` con los datos recibidos, y lo agrega almacena llamando a `store_bet()`. Luego loggea lo pedido y ademas lo envía al cliente como confirmación.
