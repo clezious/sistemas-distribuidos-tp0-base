@@ -195,7 +195,7 @@ func (c *Client) sendQueryWinners() bool{
 		)		
 		return retry
 	}	
-	if msg != "QUERY_FAIL\n" {			
+	if msg != "QUERY_FAIL" {			
 		winners := strings.Split(msg, ",")[1]
 		log.Infof("action: consulta_ganadores | result: success | client_id: %v | cant_ganadores: %v",
 			c.config.ID,

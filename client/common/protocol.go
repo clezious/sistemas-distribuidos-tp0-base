@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"	
 	"bufio"	
+	"strings"
 )
 
 func sendClientBatch(conn net.Conn, batch string) error {
@@ -43,6 +44,7 @@ func sendClientQueryWinners(conn net.Conn, clientId string) error {
 }
 
 func recvServerMessage(conn net.Conn) (string, error) {
-	msg, err := bufio.NewReader(conn).ReadString('\n')	
+	msg, err := bufio.NewReader(conn).ReadString('\n')
+	msg = strings.TrimSuffix(msg, "\n")
 	return msg, err
 }
