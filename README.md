@@ -160,3 +160,4 @@ Además, se agregó el atributo `lock = multiprocessing.lock()` en `Server`, que
 ### Extras:
 - Se hizo un refactor del método `Protocol.send_server_message()` en el *Server* para abstraer mejor la lógica interna del protocolo.
     - Algunos mensajes que se enviaban desde *Server* cambiaron, pero no tenían impacto en el funcionamiento del sistema.
+- Se extrajo la funcionalidad de procesamiento de mensajes recibidos en el servidor por los clientes del método `__handle_client_connection` al nuevo método `_handle_client_message()`

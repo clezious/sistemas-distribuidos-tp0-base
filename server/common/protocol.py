@@ -20,7 +20,7 @@ class Protocol:
             bets = []
             while (msg := Protocol._read_line(client_sock)) != "BATCH_END":
                 bets.append(msg.split(","))
-            return {'action': 'batch', 'data': bets}
+            return {'action': 'batch', 'data': {'bets': bets}}
         elif msg.startswith("FINISHED"):
             return {'action': 'client_finished', 'data': {"agency": msg.split(",")[1]}}
         elif msg.startswith("QUERY"):
